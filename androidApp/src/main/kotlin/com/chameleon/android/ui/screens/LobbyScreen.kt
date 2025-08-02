@@ -24,13 +24,13 @@ fun LobbyScreen(
     viewModel: NetworkGameViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    
+
     LaunchedEffect(uiState.gameState.phase) {
         if (uiState.gameState.phase != GamePhase.SETUP) {
             onGameStarted()
         }
     }
-    
+
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -45,7 +45,7 @@ fun LobbyScreen(
                 }
             }
         )
-        
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -77,7 +77,7 @@ fun LobbyScreen(
                 }
                 Spacer(modifier = Modifier.height(16.dp))
             }
-            
+
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -91,7 +91,7 @@ fun LobbyScreen(
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
-                    
+
                     if (uiState.gameState.players.isEmpty()) {
                         Text(
                             text = "Waiting for players...",
@@ -141,42 +141,21 @@ fun LobbyScreen(
                     }
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
-            if (uiState.isHost) {
-                Button(
-                    onClick = {
-                        viewModel.startGame(uiState.gameState.players.map { it.name })
-                    },
-                    enabled = uiState.gameState.players.size >= 3,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp)
-                ) {
-                    Text(
-                        text = if (uiState.gameState.players.size < 3) {
-                            "Need at least 3 players"
-                        } else {
-                            "Start Game"
-                        },
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-            } else {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Text(
-                        text = "Waiting for host to start the game...",
-                        modifier = Modifier.padding(16.dp),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Text(
+                    text = "Waiting for host to start the game...",
+                    modifier = Modifier.padding(16.dp),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyLarge
+                )
             }
         }
     }
