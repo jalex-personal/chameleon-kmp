@@ -45,12 +45,6 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-okhttp:2.3.5")
-                
-                // Ktor server dependencies (Android only)
-                implementation("io.ktor:ktor-server-core:2.3.5")
-                implementation("io.ktor:ktor-server-websockets:2.3.5")
-                implementation("io.ktor:ktor-server-content-negotiation:2.3.5")
-                implementation("io.ktor:ktor-server-netty:2.3.5")
             }
         }
         val androidUnitTest by getting

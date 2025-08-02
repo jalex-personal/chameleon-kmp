@@ -22,7 +22,8 @@ fun JoinGameScreen(
     viewModel: NetworkGameViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    var hostIp by remember { mutableStateOf("192.168.1.") }
+    var backendIp by remember { mutableStateOf(uiState.backendIp) }
+    var backendPort by remember { mutableStateOf(uiState.backendPort.toString()) }
     var playerName by remember { mutableStateOf("") }
     
     LaunchedEffect(uiState.isConnected, uiState.currentPlayerId) {
@@ -78,10 +79,22 @@ fun JoinGameScreen(
                     )
                     
                     OutlinedTextField(
-                        value = hostIp,
-                        onValueChange = { hostIp = it },
-                        label = { Text("Host IP Address") },
+                        value = backendIp,
+                        onValueChange = { backendIp = it },
+                        label = { Text("Backend IP Address") },
                         placeholder = { Text("192.168.1.100") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                    
+                    OutlinedTextField(
+                        value = backendPort,
+                        onValueChange = { backendPort = it },
+                        label = { Text("Backend Port") },
+                        placeholder = { Text("8080") },
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(bottom = 16.dp),
@@ -108,9 +121,10 @@ fun JoinGameScreen(
                     
                     Button(
                         onClick = {
-                            viewModel.joinGame(hostIp.trim(), playerName.trim())
+                            viewModel.setBackendAddress(backendIp.trim(), backendPort.toIntOrNull() ?: 8080)
+                            viewModel.joinGame(playerName.trim())
                         },
-                        enabled = hostIp.isNotBlank() && playerName.isNotBlank() && !uiState.isLoading,
+                        enabled = backendIp.isNotBlank() && playerName.isNotBlank() && !uiState.isLoading,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
@@ -148,9 +162,10 @@ fun JoinGameScreen(
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
                     Text(
-                        text = "• Ask the host for their IP address\n" +
-                                "• Make sure you're on the same WiFi network\n" +
-                                "• Enter your name and the host's IP address\n" +
+                        text = "• Make sure the backend server is running\n" +
+                                "• Get the backend server's IP address and port\n" +
+                                "• Make sure you're on the same network as the backend\n" +
+                                "• Enter your name and the backend details\n" +
                                 "• Tap 'Join Game' to connect",
                         style = MaterialTheme.typography.bodyMedium
                     )

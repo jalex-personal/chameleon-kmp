@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chameleon.game.GameState
 import com.chameleon.network.GameClient
-import com.chameleon.network.GameServer
 import com.chameleon.network.NetworkMessage
 import com.chameleon.network.PlayerActionType
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -14,16 +13,15 @@ import kotlinx.coroutines.launch
 
 data class NetworkGameUiState(
     val gameState: GameState = GameState(),
-    val isHost: Boolean = false,
     val isConnected: Boolean = false,
     val connectionError: String? = null,
-    val hostIp: String? = null,
+    val backendIp: String = "192.168.1.100",
+    val backendPort: Int = 8080,
     val currentPlayerId: String? = null,
     val isLoading: Boolean = false
 )
 
 class NetworkGameViewModel : ViewModel() {
-    private val gameServer = GameServer()
     private val gameClient = GameClient()
     
     private val _uiState = MutableStateFlow(NetworkGameUiState())
@@ -32,7 +30,6 @@ class NetworkGameViewModel : ViewModel() {
     init {
         observeNetworkMessages()
         observeConnectionState()
-        observeGameState()
     }
     
     private fun observeNetworkMessages() {
@@ -75,68 +72,58 @@ class NetworkGameViewModel : ViewModel() {
             gameClient.connectionStateFlow.collect { isConnected ->
                 _uiState.value = _uiState.value.copy(
                     isConnected = isConnected,
-                    connectionError = if (!isConnected && !_uiState.value.isHost) "Connection lost" else null
+                    connectionError = if (!isConnected) "Connection lost" else null
                 )
             }
         }
     }
     
-    private fun observeGameState() {
-        viewModelScope.launch {
-            gameServer.gameStateFlow.collect { gameState ->
-                if (_uiState.value.isHost) {
-                    _uiState.value = _uiState.value.copy(
-                        gameState = gameState
-                    )
-                }
-            }
-        }
-    }
-    
-    fun startHosting(port: Int = 8080): Boolean {
-        val hostIp = gameServer.startServer(port)
-        return if (hostIp != null) {
-            _uiState.value = _uiState.value.copy(
-                isHost = true,
-                isConnected = true,
-                hostIp = hostIp,
-                connectionError = null,
-                currentPlayerId = "host_player"
-            )
-            
-            viewModelScope.launch {
-                gameClient.connect("localhost", port, "Host")
-            }
-            
-            true
-        } else {
-            _uiState.value = _uiState.value.copy(
-                connectionError = "Failed to start server"
-            )
-            false
-        }
-    }
-    
-    fun joinGame(hostIp: String, playerName: String) {
+    fun createGame(playerName: String) {
         _uiState.value = _uiState.value.copy(
             isLoading = true,
             connectionError = null
         )
         
         viewModelScope.launch {
-            val success = gameClient.connect(hostIp, 8080, playerName)
+            val success = gameClient.createGame(_uiState.value.backendIp, _uiState.value.backendPort, playerName)
             if (!success) {
                 _uiState.value = _uiState.value.copy(
-                    connectionError = "Failed to connect to host",
+                    connectionError = "Failed to connect to backend server",
                     isLoading = false
                 )
             }
         }
     }
     
-    fun startGame(playerNames: List<String>) {
-        if (_uiState.value.isHost) {
-            gameServer.startGame(playerNames)
+    fun setBackendAddress(ip: String, port: Int) {
+        _uiState.value = _uiState.value.copy(
+            backendIp = ip,
+            backendPort = port
+        )
+    }
+    
+    fun joinGame(playerName: String) {
+        _uiState.value = _uiState.value.copy(
+            isLoading = true,
+            connectionError = null
+        )
+        
+        viewModelScope.launch {
+            val success = gameClient.connect(_uiState.value.backendIp, _uiState.value.backendPort, playerName)
+            if (!success) {
+                _uiState.value = _uiState.value.copy(
+                    connectionError = "Failed to connect to backend server",
+                    isLoading = false
+                )
+            }
+        }
+    }
+    
+    fun startGame() {
+        val playerId = _uiState.value.currentPlayerId ?: return
+        
+        viewModelScope.launch {
+            gameClient.sendPlayerAction(playerId, PlayerActionType.READY_FOR_NEXT_ROUND)
         }
     }
     
@@ -174,12 +161,7 @@ class NetworkGameViewModel : ViewModel() {
     
     fun disconnect() {
         viewModelScope.launch {
-            if (_uiState.value.isHost) {
-                gameServer.stopServer()
-            } else {
-                gameClient.disconnect()
-            }
-            
+            gameClient.disconnect()
             _uiState.value = NetworkGameUiState()
         }
     }
