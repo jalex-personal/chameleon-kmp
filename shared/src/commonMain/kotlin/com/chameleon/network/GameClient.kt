@@ -57,6 +57,11 @@ class GameClient {
         }
     }
     
+    suspend fun createGame(hostIp: String, port: Int = 8080, playerName: String): Boolean {
+        // For now, creating a game is the same as joining - the backend handles game creation
+        return connect(hostIp, port, playerName)
+    }
+    
     suspend fun disconnect() {
         session?.close()
         session = null

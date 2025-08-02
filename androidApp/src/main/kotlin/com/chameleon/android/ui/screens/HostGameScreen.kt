@@ -23,10 +23,13 @@ fun HostGameScreen(
     viewModel: NetworkGameViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var playerName by remember { mutableStateOf("") }
+    var backendIp by remember { mutableStateOf(uiState.backendIp) }
+    var backendPort by remember { mutableStateOf(uiState.backendPort.toString()) }
     
     LaunchedEffect(Unit) {
-        if (!uiState.isHost) {
-            viewModel.startHosting()
+        if (!uiState.isConnected && playerName.isNotEmpty()) {
+            viewModel.createGame(playerName)
         }
     }
     
@@ -34,7 +37,7 @@ fun HostGameScreen(
         modifier = Modifier.fillMaxSize()
     ) {
         TopAppBar(
-            title = { Text("Host Game") },
+            title = { Text("Create Game") },
             navigationIcon = {
                 IconButton(onClick = {
                     viewModel.disconnect()
@@ -51,61 +54,101 @@ fun HostGameScreen(
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            if (uiState.connectionError != null) {
+            if (!uiState.isConnected) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
-                    Text(
-                        text = uiState.connectionError ?: "",
-                        modifier = Modifier.padding(16.dp),
-                        color = MaterialTheme.colorScheme.onErrorContainer
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-            
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Game Server Running",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    
-                    if (uiState.hostIp != null) {
+                    Column(
+                        modifier = Modifier.padding(16.dp)
+                    ) {
                         Text(
-                            text = "Share this IP with other players:",
+                            text = "Backend Server Configuration",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        
+                        OutlinedTextField(
+                            value = backendIp,
+                            onValueChange = { backendIp = it },
+                            label = { Text("Backend IP Address") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        OutlinedTextField(
+                            value = backendPort,
+                            onValueChange = { backendPort = it },
+                            label = { Text("Backend Port") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        OutlinedTextField(
+                            value = playerName,
+                            onValueChange = { playerName = it },
+                            label = { Text("Your Name") },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Button(
+                            onClick = {
+                                viewModel.setBackendAddress(backendIp, backendPort.toIntOrNull() ?: 8080)
+                                viewModel.createGame(playerName)
+                            },
+                            enabled = playerName.isNotEmpty() && backendIp.isNotEmpty() && !uiState.isLoading,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (uiState.isLoading) {
+                                CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                            } else {
+                                Text("Create Game")
+                            }
+                        }
+                    }
+                }
+                
+                if (uiState.connectionError != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.errorContainer
+                        )
+                    ) {
+                        Text(
+                            text = uiState.connectionError ?: "",
+                            modifier = Modifier.padding(16.dp),
+                            color = MaterialTheme.colorScheme.onErrorContainer
+                        )
+                    }
+                }
+            } else {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Connected to Backend",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        
+                        Text(
+                            text = "Backend: ${uiState.backendIp}:${uiState.backendPort}",
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            )
-                        ) {
-                            Text(
-                                text = uiState.hostIp ?: "",
-                                style = MaterialTheme.typography.headlineMedium,
-                                fontWeight = FontWeight.Bold,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
                     }
                 }
             }
@@ -161,24 +204,26 @@ fun HostGameScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            Button(
-                onClick = {
-                    viewModel.startGame(uiState.gameState.players.map { it.name })
-                    onStartGame()
-                },
-                enabled = uiState.gameState.players.size >= 3,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-            ) {
-                Text(
-                    text = if (uiState.gameState.players.size < 3) {
-                        "Need at least 3 players"
-                    } else {
-                        "Start Game"
+            if (uiState.isConnected) {
+                Button(
+                    onClick = {
+                        viewModel.startGame()
+                        onStartGame()
                     },
-                    style = MaterialTheme.typography.titleMedium
-                )
+                    enabled = uiState.gameState.players.size >= 3,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                ) {
+                    Text(
+                        text = if (uiState.gameState.players.size < 3) {
+                            "Need at least 3 players"
+                        } else {
+                            "Start Game"
+                        },
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
             }
         }
     }
