@@ -30,15 +30,11 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
                 
-                // Ktor networking for multiplayer
+                // Ktor client dependencies (cross-platform)
                 implementation("io.ktor:ktor-client-core:2.3.5")
                 implementation("io.ktor:ktor-client-websockets:2.3.5")
                 implementation("io.ktor:ktor-client-content-negotiation:2.3.5")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.5")
-                implementation("io.ktor:ktor-server-core:2.3.5")
-                implementation("io.ktor:ktor-server-websockets:2.3.5")
-                implementation("io.ktor:ktor-server-content-negotiation:2.3.5")
-                implementation("io.ktor:ktor-server-netty:2.3.5")
             }
         }
         val commonTest by getting {
@@ -49,6 +45,12 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 implementation("io.ktor:ktor-client-okhttp:2.3.5")
+                
+                // Ktor server dependencies (Android only)
+                implementation("io.ktor:ktor-server-core:2.3.5")
+                implementation("io.ktor:ktor-server-websockets:2.3.5")
+                implementation("io.ktor:ktor-server-content-negotiation:2.3.5")
+                implementation("io.ktor:ktor-server-netty:2.3.5")
             }
         }
         val androidUnitTest by getting
