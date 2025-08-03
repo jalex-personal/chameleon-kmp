@@ -13,12 +13,12 @@
 		2152FB0B2600AC9000CF470E /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2152FB0A2600AC9000CF470E /* Preview Assets.xcassets */; };
 		7555FF83242A565900829871 /* shared.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* shared.framework */; };
 		7555FF84242A565900829871 /* shared.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* shared.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		A1001234567890AB /* NetworkSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AA /* NetworkSetupView.swift */; };
-		A1001234567890AC /* HostGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AB /* HostGameView.swift */; };
-		A1001234567890AD /* JoinGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AC /* JoinGameView.swift */; };
-		A1001234567890AE /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AD /* LobbyView.swift */; };
-		A1001234567890AF /* NetworkGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AE /* NetworkGameView.swift */; };
-		A1001234567890B0 /* NetworkGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AF /* NetworkGameViewModel.swift */; };
+		A1001234567890B1 /* NetworkSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AA /* NetworkSetupView.swift */; };
+		A1001234567890B2 /* HostGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AB /* HostGameView.swift */; };
+		A1001234567890B3 /* JoinGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AC /* JoinGameView.swift */; };
+		A1001234567890B4 /* LobbyView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AD /* LobbyView.swift */; };
+		A1001234567890B5 /* NetworkGameView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AE /* NetworkGameView.swift */; };
+		A1001234567890B6 /* NetworkGameViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1001234567890AF /* NetworkGameViewModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -208,12 +208,12 @@
 			files = (
 				2152FB062600AC8F00CF470E /* ContentView.swift in Sources */,
 				2152FB042600AC8F00CF470E /* iosAppApp.swift in Sources */,
-				A1001234567890AB /* NetworkSetupView.swift in Sources */,
-				A1001234567890AC /* HostGameView.swift in Sources */,
-				A1001234567890AD /* JoinGameView.swift in Sources */,
-				A1001234567890AE /* LobbyView.swift in Sources */,
-				A1001234567890AF /* NetworkGameView.swift in Sources */,
-				A1001234567890B0 /* NetworkGameViewModel.swift in Sources */,
+				A1001234567890B1 /* NetworkSetupView.swift in Sources */,
+				A1001234567890B2 /* HostGameView.swift in Sources */,
+				A1001234567890B3 /* JoinGameView.swift in Sources */,
+				A1001234567890B4 /* LobbyView.swift in Sources */,
+				A1001234567890B5 /* NetworkGameView.swift in Sources */,
+				A1001234567890B6 /* NetworkGameViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
